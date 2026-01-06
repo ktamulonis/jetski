@@ -4,6 +4,7 @@ module Jetski
     extend self
     # Responsibility is to load all models in app.
     def call
+      loaded_models = []
       model_file_paths.each do |path_to_model|
         require_relative path_to_model
         # Call method to define model attributes after loading
@@ -16,7 +17,9 @@ module Jetski
         # Post/comment
         model_class = Object.const_get(model_name)
         model_class.define_attribute_methods
+        loaded_models << model_class
       end
+      Jetski::Family.bootstrap!(loaded_models)
     end
 
     def load_controllers

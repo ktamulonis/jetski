@@ -26,6 +26,29 @@ module Jetski
       nil
     end
 
+    def method_missing(name, *args)
+      # child collection (e.g. chat.messages)
+      kids = self.class.kids
+      if kids.key?(name)
+        child_class = kids[name]
+        fk = "#{self.class.name.downcase}_id"
+
+        rows = child_class.db.execute(
+          "SELECT * FROM #{child_class.pluralized_table_name} WHERE #{fk} = ?",
+          id
+        )
+
+        columns = child_class.attributes
+        return rows.map { |row| child_class.send(:new_from_row, row, columns) }
+      end
+
+      super
+    end
+
+    def respond_to_missing?(name, include_private = false)
+      self.class.kids.key?(name) || super
+    end
+
     class << self
       def create(hash_args = nil, **key_args)
         args = if hash_args && hash_args.is_a?(Hash)
@@ -124,7 +147,21 @@ module Jetski
           table_name + "s"
         end
       end
+
+      def parents
+        Jetski::Family.parents_for(self)
+      end
+
+      def kids
+        Jetski::Family.kids_for(self)
+      end
+
+      def family
+        Jetski::Family.family_for(self)
+      end
+
     private
+
       def format_model_obj(row, columns = nil)
         return unless row
         columns ||= attributes
@@ -134,6 +171,14 @@ module Jetski
         end
         new(**row_obj)
       end
+      
+      def new_from_row(row, columns)
+        attrs = {}
+        columns.each_with_index { |c, i| attrs[c] = row[i] }
+        new(**attrs)
+      end
+      private :new_from_row
+
     end
   end
 end

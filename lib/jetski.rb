@@ -22,6 +22,7 @@ require_relative './jetski/server'
 require_relative './jetski/database/base'
 require_relative './jetski/model'
 require_relative './jetski/view_renderer'
+require_relative "./jetski/family"
 
 module Jetski
   extend self
