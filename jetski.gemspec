@@ -22,5 +22,6 @@ Gem::Specification.new do |s|
   s.add_dependency('sqlite3', '~> 2.8.0')
   s.add_dependency('pry', '~> 0.15.2')
   s.add_dependency('rack', '~> 3.2.4')
+  s.add_dependency('kinship', '~> 0.0.1')
   s.executables << "jetski"
 end

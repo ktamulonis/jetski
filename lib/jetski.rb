@@ -4,6 +4,7 @@ require "ostruct"
 require "erb"
 require "rack"
 require "sqlite3"
+require "kinship"
 
 require_relative './jetski/version'
 require_relative './jetski/helpers/view_helpers'
@@ -22,9 +23,11 @@ require_relative './jetski/server'
 require_relative './jetski/database/base'
 require_relative './jetski/model'
 require_relative './jetski/view_renderer'
+require_relative "./jetski/relations"
 
 module Jetski
   extend self
+  attr_accessor :kinship
   def app_root
     Dir.pwd
   end
