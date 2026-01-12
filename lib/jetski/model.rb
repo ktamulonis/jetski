@@ -1,3 +1,5 @@
+require "jetski/stream"
+
 module Jetski
   class Model
     extend Jetski::Database::Base
@@ -24,6 +26,14 @@ module Jetski
       SQL
       self.class.db.execute(delete_sql, id)
       nil
+    end
+
+    def patch(attrs)
+      self.class.patch(id, attrs)
+    end
+
+    def append(field, value)
+      self.class.append(id, field, value)
     end
 
     class << self
@@ -60,6 +70,7 @@ module Jetski
           post_attributes[k] = data_values[i]
         end
 
+        define_attribute_methods
         new(**post_attributes)
       end
 
@@ -114,6 +125,30 @@ module Jetski
         format_model_obj(rows.last, columns)
       end
       
+      # ---- CLASS-LEVEL MUTATION ----
+
+      def patch(id, attrs)
+        record = find(id)
+
+        # Adapt this line if Jetski uses a different internal update API
+        update_row(id, attrs)
+
+        Jetski::Stream.broadcast(
+          model: name,
+          id: id,
+          changes: attrs
+        )
+
+        find(id)
+      end
+
+      def append(id, field, value)
+        record = find(id)
+        current = record.public_send(field)
+
+        patch(id, field => current.to_s + value.to_s)
+      end
+
       def table_name
         self.to_s.downcase
       end
@@ -125,7 +160,9 @@ module Jetski
           table_name + "s"
         end
       end
+
     private
+
       def format_model_obj(row, columns = nil)
         return unless row
         columns ||= attributes
@@ -135,6 +172,20 @@ module Jetski
         end
         new(**row_obj)
       end
+
+      def update_row(id, attrs)
+        set_clause = attrs.keys.map { |k| "#{k} = ?" }.join(", ")
+        values = attrs.values
+
+        sql = <<~SQL
+          UPDATE #{pluralized_table_name}
+          SET #{set_clause}
+          WHERE id = ?
+        SQL
+
+        db.execute(sql, values + [id])
+      end
+
     end
   end
 end
