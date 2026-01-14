@@ -14,9 +14,13 @@ class ModelBroadcastTest < Minitest::Test
   def test_patch_triggers_stream_broadcast
     calls = []
 
-    Jetski::Stream.stub :broadcast, ->(payload) { calls << payload } do
-      TestMessage.patch(@message.id, content: "hi")
+    original = Jetski::Stream.method(:broadcast)
+
+    Jetski::Stream.define_singleton_method(:broadcast) do |payload|
+      calls << payload
     end
+
+    TestMessage.patch(@message.id, content: "hi")
 
     assert_equal 1, calls.size
 
@@ -24,6 +28,8 @@ class ModelBroadcastTest < Minitest::Test
     assert_equal "TestMessage", payload[:model]
     assert_equal @message.id, payload[:id]
     assert_equal({ content: "hi" }, payload[:changes])
+  ensure
+    Jetski::Stream.define_singleton_method(:broadcast, original)
   end
 end
 

@@ -20,3 +20,8 @@ Jetski::Database::Base.db.execute <<~SQL
   );
 SQL
 
+# ---- LOAD ALL TEST FILES ----
+Dir[File.join(__dir__, "*_test.rb")].each do |file|
+  require file unless file.end_with?("test_helper.rb")
+end
+
