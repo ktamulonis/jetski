@@ -1,4 +1,5 @@
-require "jetski/stream"
+require_relative "stream"
+require_relative "events"
 
 module Jetski
   class Model
@@ -129,9 +130,19 @@ module Jetski
 
       def patch(id, attrs)
         record = find(id)
+        return unless record
 
-        # Adapt this line if Jetski uses a different internal update API
         update_row(id, attrs)
+
+        Jetski::Events.publish(
+          :model_patched,
+          {
+            model: name,
+            id: id,
+            changes: attrs,
+            record: find(id)
+          }
+        )
 
         Jetski::Stream.broadcast(
           model: name,
