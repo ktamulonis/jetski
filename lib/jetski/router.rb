@@ -1,7 +1,9 @@
 module Jetski
   class Router
     include Parser
+
     attr_reader :server, :routes, :crud_routes
+
     def initialize(server)
       @server = server
       @crud_routes = []
@@ -13,86 +15,116 @@ module Jetski
       host_routes
       host_crud_routes
       host_assets
+      host_stream
     end
 
+    # ------------------------------------------------------------
+    # ROUTES
+    # ------------------------------------------------------------
     def host_routes
-      crud_actions = %w(new create show index edit update destroy)
-      routes.each do |af_route|
-        if crud_actions.include?(af_route[:action_name]) && (af_route[:url] != '/')
-          @crud_routes << af_route
-          next 
-          # We need to have only one server block for routes with handle crud enabled
+      crud_actions = %w[new create show index edit update destroy]
+
+      routes.each do |route|
+        if crud_actions.include?(route[:action_name]) && route[:url] != "/"
+          @crud_routes << route
+          next
         end
-        Host::Controller.new(server, **af_route).call
+
+        Host::Controller.new(server, **route).call
       end
     end
 
     def host_crud_routes
-      crud_routes_for_controller = crud_routes.group_by { |route| route[:controller_path] }
-      crud_routes_for_controller.each do |controller_path, controller_routes|
-        Host::Crud.new(server, controller_routes, **controller_routes.first).call
+      crud_routes.group_by { |r| r[:controller_path] }.each do |_path, routes|
+        Host::Crud.new(server, routes, **routes.first).call
       end
     end
 
+    # ------------------------------------------------------------
+    # ASSETS
+    # ------------------------------------------------------------
     def host_assets
-      host_css && host_images && host_javascript && host_javascript_helpers
+      host_css
+      host_images
+      host_javascript
+      host_javascript_helpers
     end
 
     def host_css
-      css_files = Dir[File.join(Jetski.app_root,'app/assets/stylesheets/**/*.css')]
-      css_files.each do |file_path|
-        filename  = file_path.split("app/assets/stylesheets/").last
-        asset_url = "/#{filename}"
-        server.mount_proc asset_url do |req, res|
-          res.content_type = "text/css"
-          res.body = File.read(File.join(Jetski.app_root,"app/assets/stylesheets/#{filename}"))
-        end
+      Dir[File.join(Jetski.app_root, "app/assets/stylesheets/**/*.css")].each do |file|
+        name = file.split("stylesheets/").last
+        server.mount_proc("/#{name}") { |_req, res| res.body = File.read(file) }
       end
     end
 
     def host_images
-      file_ext_types = ["png", "jpg"] # TODO: Expand this to support more types of images.
-      image_files = Dir.glob(
-        file_ext_types.map { |ext| File.join(Jetski.app_root, "app/assets/images/*.#{ext}")  }
-      )
-      image_files.each do |file_path|
-        filename = file_path.split("/").last
-        asset_url = "/#{filename}"
-        server.mount_proc asset_url do |req, res|
-          res.content_type = "image/*"
-          res.body = File.read(File.join(Jetski.app_root,"app/assets/images/#{filename}"))
-        end
+      Dir[File.join(Jetski.app_root, "app/assets/images/*")].each do |file|
+        name = File.basename(file)
+        server.mount_proc("/#{name}") { |_req, res| res.body = File.read(file) }
       end
     end
 
     def host_javascript
-      js_files = Dir[File.join(Jetski.app_root,'app/assets/javascript/**/*.js')]
-      js_files.each do |file_path|
-        filename  = file_path.split("app/assets/javascript/").last
-        asset_url = "/#{filename}"
-        server.mount_proc asset_url do |req, res|
-          res.content_type = "text/javascript"
-          res.body = File.read(File.join(Jetski.app_root,"app/assets/javascript/#{filename}"))
-        end
+      Dir[File.join(Jetski.app_root, "app/assets/javascript/**/*.js")].each do |file|
+        name = file.split("javascript/").last
+        server.mount_proc("/#{name}") { |_req, res| res.body = File.read(file) }
       end
     end
 
     def host_javascript_helpers
-      server.mount_proc "/reactive-form.js" do |req, res|
-        res.content_type = "text/javascript"
-        res.body = File.read(File.join(__dir__, 'frontend/javascript_helpers.js'))
+      server.mount_proc "/reactive-form.js" do |_req, res|
+        res.body = File.read(File.join(__dir__, "frontend/javascript_helpers.js"))
       end
     end
 
-    # routes to help browser default requests etc. prevent breakage
-    def browser_support
-      server.mount_proc "/favicon.ico" do |req, res|
-        res.status = 204  # No Content
+    # ------------------------------------------------------------
+    # 🔥 SERVER-SENT EVENTS (WEBrick-compatible)
+    # ------------------------------------------------------------
+    def host_stream
+      server.mount_proc "/stream" do |_req, res|
+        res.status = 200
+        res["Content-Type"]  = "text/event-stream"
+        res["Cache-Control"] = "no-cache"
+        res["Connection"]    = "keep-alive"
+
+        # ❌ DO NOT enable chunked for WEBrick
+        # res.chunked = true
+
+        res.body = proc do |out|
+          # Force header flush
+          out << ": connected\n\n"
+
+          writer = proc do |data|
+            # 🔒 WEBrick REQUIRES String
+            out << data.to_s
+          end
+
+          Jetski::Stream.subscribe(&writer)
+
+          begin
+            loop do
+              out << ": ping\n\n"
+              sleep 15
+            end
+          ensure
+            Jetski::Stream.unsubscribe(writer)
+          end
+        end
       end
     end
-  private
+
+    # ------------------------------------------------------------
+    def browser_support
+      server.mount_proc "/favicon.ico" do |_req, res|
+        res.status = 204
+      end
+    end
+
+    private
+
     def fetch_routes
       @routes ||= compile_routes
     end
   end
 end
+

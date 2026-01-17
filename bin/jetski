@@ -1,31 +1,34 @@
 #!/usr/bin/env ruby
 
-require 'jetski'
-require 'optparse'
-require 'thor'
+require "bundler/setup"
+require "jetski"
+require "optparse"
+require "thor"
 require "pry"
 
-require_relative './jetski_cli_helpers/generators/controller.rb'
-require_relative './jetski_cli_helpers/generators/model.rb'
-require_relative './jetski_cli_helpers/destroyers/controller.rb'
-require_relative './jetski_cli_helpers/destroyers/model.rb'
-require_relative './jetski_cli_helpers/shared_methods.rb'
-require_relative './jetski_cli_helpers/generate.rb'
-require_relative './jetski_cli_helpers/destroy.rb'
-require_relative './jetski_cli_helpers/database.rb'
-
-require 'bundler/setup'
+require_relative "./jetski_cli_helpers/generators/controller"
+require_relative "./jetski_cli_helpers/generators/model"
+require_relative "./jetski_cli_helpers/destroyers/controller"
+require_relative "./jetski_cli_helpers/destroyers/model"
+require_relative "./jetski_cli_helpers/shared_methods"
+require_relative "./jetski_cli_helpers/generate"
+require_relative "./jetski_cli_helpers/destroy"
+require_relative "./jetski_cli_helpers/database"
 
 class JetskiCLI < Thor
   include Thor::Actions
+
   desc "new APP_NAME", "Create a new Jetski app"
   def new(name)
     return say "There is already a folder named #{name} in this directory." if File.exist?(name)
+
     FileUtils.mkdir_p(name)
     say "Creating #{name} app with Jetski!"
-    directory "base", "#{name}"
+
+    directory "base", name
     gsub_file "#{name}/app/views/layouts/application.html.erb", /APP_NAME/, name.capitalize
     gsub_file "#{name}/app/views/pages/home.html.erb", /APP_NAME/, name.capitalize
+
     run "cd #{name} && bundle install"
     say "🌊 Your app #{name} has been generated!"
   end
@@ -35,7 +38,7 @@ class JetskiCLI < Thor
     say "Jetski v#{Jetski::VERSION}"
   end
 
-  desc "routes", "shows the routes in your app."
+  desc "routes", "shows the routes in your app"
   def routes
     compiled_routes = Jetski::Router::Parser.compile_routes
     say "🌊 Jetski Routes 🏄‍♂️"
@@ -45,9 +48,10 @@ class JetskiCLI < Thor
   end
 
   desc "server", "starts the jetski app"
-  method_option :port, :aliases => "-p", :desc => "Configure which port number to run server on"
+  method_option :port, aliases: "-p", desc: "Port to run the server on (default: 8000)"
   def server
-    Jetski::Server.new(port: options[:port]).call
+    port = (options[:port] || 8000).to_i
+    Jetski::Server.new(port: port).call
   end
 
   desc "console", "opens jetski console"
@@ -65,15 +69,16 @@ class JetskiCLI < Thor
 
   desc "db", "commands related to database"
   subcommand "db", JetskiCLIHelpers::Database
-  
+
   def self.source_root
-    File.join(File.dirname(__FILE__), '..', 'templates')
+    File.join(File.dirname(__FILE__), "..", "templates")
   end
 end
 
-# Version command seperate from thor for simplicity
-if ["-v", "--version"].include?(ARGV[0])
+# Version command separate from Thor for simplicity
+if ["-v", "--version"].include?(ARGV.first)
   puts "Jetski v#{Jetski::VERSION}"
 else
   JetskiCLI.start(ARGV)
 end
+

@@ -153,12 +153,47 @@ module Jetski
         find(id)
       end
 
+      #def append(id, field, value)
+      #  record = find(id)
+      # current = record.public_send(field)
+#
+      #  patch(id, field => current.to_s + value.to_s)
+#     end
+
       def append(id, field, value)
         record = find(id)
-        current = record.public_send(field)
+        return unless record
 
-        patch(id, field => current.to_s + value.to_s)
+        current = record.public_send(field).to_s
+        delta   = value.to_s
+        updated = current + delta
+
+        # 1️⃣ Persist
+        update_row(id, field => updated)
+
+        # 2️⃣ Broadcast *delta* (THIS is the missing link)
+        Jetski::Stream.broadcast(
+          type: "model_append",
+          model: name,
+          id: id,
+          attribute: field,
+          delta: delta
+        )
+
+        # 3️⃣ Publish semantic event
+        Jetski::Events.publish(
+          :model_appended,
+          {
+            model: name,
+            id: id,
+            attribute: field,
+            delta: delta
+          }
+        )
+
+        find(id)
       end
+
 
       def table_name
         self.to_s.downcase
