@@ -92,22 +92,35 @@ module Jetski
 
         res.body = proc do |out|
           # Force header flush
-          out << ": connected\n\n"
-
-          writer = proc do |data|
-            # 🔒 WEBrick REQUIRES String
-            out << data.to_s
-          end
-
-          Jetski::Stream.subscribe(&writer)
+          connected = true
 
           begin
-            loop do
-              out << ": ping\n\n"
-              sleep 15
+            out << ": connected\n\n"
+          rescue IOError, Errno::EPIPE
+            connected = false
+          end
+
+          if connected
+            writer = proc do |data|
+              # 🔒 WEBrick REQUIRES String
+              out << data.to_s
             end
-          ensure
-            Jetski::Stream.unsubscribe(writer)
+
+            Jetski::Stream.subscribe(&writer)
+
+            begin
+              loop do
+                break if Jetski::Stream.wait_for_shutdown(15)
+
+                begin
+                  out << ": ping\n\n"
+                rescue IOError, Errno::EPIPE
+                  break
+                end
+              end
+            ensure
+              Jetski::Stream.unsubscribe(writer)
+            end
           end
         end
       end
@@ -127,4 +140,3 @@ module Jetski
     end
   end
 end
-
