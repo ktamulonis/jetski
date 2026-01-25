@@ -1,6 +1,7 @@
 require "bundler/setup"
 require "minitest/autorun"
 require "jetski"
+require_relative "support/fakes"
 
 # Load Jetski internals (same as console)
 Jetski::Autoloader.call
@@ -24,4 +25,3 @@ SQL
 Dir[File.join(__dir__, "*_test.rb")].each do |file|
   require file unless file.end_with?("test_helper.rb")
 end
-

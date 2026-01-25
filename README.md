@@ -204,6 +204,16 @@ then run the command in terminal
 
 `jetski db seed`
 
+### Testing
+
+Run the test suite with:
+
+```sh
+bundle exec ruby test/test_helper.rb
+```
+
+Note: CLI tests generate files in a temp directory and clean them up automatically.
+
 ### Configure database library
 
 currently the jetski framework only supports sqlite3 as the database library
