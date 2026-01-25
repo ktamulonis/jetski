@@ -1,7 +1,6 @@
 module JetskiCLIHelpers
-  class Generate < Thor
-    include Thor::Actions, JetskiCLIHelpers::SharedMethods, 
-      Jetski::Database::Base, JetskiCLIHelpers::Generators::Controller,
+  class Generate < Base
+    include JetskiCLIHelpers::Generators::Controller,
       JetskiCLIHelpers::Generators::Model
     desc "controller NAME ACTION_NAMES", "Create a controller with matching actions"
     def controller(name, *actions)

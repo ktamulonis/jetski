@@ -1,15 +1,14 @@
 module JetskiCLIHelpers
-  class Database < Thor
-    include Thor::Actions, JetskiCLIHelpers::SharedMethods,
-      Jetski::Database::Base
-    desc "create", "Creates a database for your app"
-    def create
-      say "🌊 Database was created successfully!"
-    end
-
-    desc "create_table NAME COLUMN_NAMES", "Creates a new table in your database"
-    def create_table(name, *fields)
-      db.execute create_table_sql(table_name: name, field_names: fields)
+  class Database < Base
+    desc "migrate", "Create, load, and patch DB from models"
+    def migrate
+      Jetski::Autoloader.call
+      Jetski::Model.subclasses.each do |model|
+        table_name = model.pluralized_table_name
+        create_table_unless_exists(table_name)
+        model.db_attribute_values
+          .each { |obj| add_column_unless_exists(table_name, obj[:name], obj[:type]) }
+      end
     end
 
     desc "seed", "Seeds the database with records created from seed file"

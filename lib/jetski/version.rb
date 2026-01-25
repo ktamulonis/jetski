@@ -1,3 +1,3 @@
-module Jetski
-  VERSION = "0.4.9"
+class Jetski
+  VERSION = "0.5.1"
 end

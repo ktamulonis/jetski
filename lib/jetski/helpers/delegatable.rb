@@ -1,4 +1,4 @@
-module Jetski
+class Jetski
   module Helpers
     module Delegatable
       # delegate(:method, to: :class)

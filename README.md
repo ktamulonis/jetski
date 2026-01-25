@@ -156,6 +156,18 @@ Generate a new model with a name and the fields you want on the model.
 
 You can specify the data type as any valid data type supported by Sqlite3. using a colon similar to how rails does it.
 
+this generates the following model file: `models/post.rb`
+
+```ruby
+class Post < Jetski::Model
+  attributes :title, body: :text
+end
+```
+
+rather than how rails uses a db/migrate folder and a dsl for managing attributes jetski allows you to define your attributes inline on your model.
+
+now run `rails db migrate` which will automatically create your table and add your fields. Whenever you want to add a new field just add it to attributes and rerun the db migrate command which will add it to the table.
+
 to remove the model you can run the corresponding destroy command
 
 `jetski destroy model post`
@@ -191,6 +203,18 @@ end
 then run the command in terminal
 
 `jetski db seed`
+
+### Configure database library
+
+currently the jetski framework only supports sqlite3 as the database library
+
+in the future you would be able to create a `config.rb` file and set custom config options for jetski like changing the database library
+
+```ruby
+Jetski.config do |config|
+  config.database_library = "postgresql"
+end
+```
 
 ### Framework description
 

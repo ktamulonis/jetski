@@ -1,0 +1,8 @@
+<h1> Viewing your <%= @name %> </h1>
+<a href="/<%= @controller_name %>"> Back to <%= @controller_name %></a>
+<a href="/<%= @controller_name %>/<%%= @<%= @name %>.id %>/edit"> Edit <%= @name %></a>
+<% @field_names.each do |field| -%>
+  <p> 
+    <%= field.split(":")[0] %>: <%%= @<%= @name %>.<%= field.split(":")[0] %> %>
+  </p>
+<% end -%>

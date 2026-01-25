@@ -1,6 +1,6 @@
 # This is responsible for methods for routing in base_controller like the route class method
 
-module Jetski
+class Jetski
   module Helpers
     module RouteHelpers
       def route(method_name, root: false, path: nil, request_method: nil)

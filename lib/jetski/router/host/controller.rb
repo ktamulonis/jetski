@@ -1,4 +1,4 @@
-module Jetski
+class Jetski
   class Router
     module Host
       class Controller < Base
@@ -33,6 +33,8 @@ module Jetski
             parsed_body = parse_body(req.body, req.content_type)
             params_hash = parsed_body.merge(params_hash)
           end
+
+          # TODO: Need to support deep object structuring.
           controller.params = OpenStruct.new(params_hash)
           controller.cookies = req.cookies
           controller.send(action_name)
@@ -40,7 +42,7 @@ module Jetski
             controller.render
           end
         end
-
+      private
         def parse_body(body, content_type = '')
           case content_type
           when "application/x-www-form-urlencoded"

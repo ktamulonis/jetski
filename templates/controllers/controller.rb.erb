@@ -1,0 +1,56 @@
+class <%= @controller_class_name %>Controller < Jetski::BaseController
+<% @actions.each.with_index do |action_name, idx| -%>
+<% if action_name == "new" -%>
+  def new
+    @<%= @name %> = <%= @model_class_name %>.new
+  end
+<% end -%>
+<% if action_name == "create" -%>
+  def create
+    @<%= @name %> = <%= @model_class_name %>.create(<%= @name %>_params)
+    redirect_to "/<%= @controller_name %>/" + @<%= @name %>.id.to_s
+  end
+<% end -%>
+<% if action_name == "show" -%>
+  def show
+    @<%= @name %> = <%= @model_class_name %>.find(params[:id])
+  end
+<% end -%>
+<% if action_name == "edit" -%>
+  def edit
+    @<%= @name %> = <%= @model_class_name %>.find(params[:id])
+  end
+<% end -%>
+<% if action_name == "update" -%>
+  def update
+    @<%= @name %> = <%= @model_class_name %>.find(params[:id])
+    @<%= @name %>.update(<%= @name %>_params)
+    redirect_to "/<%= @controller_name %>/" + @<%= @name %>.id.to_s
+  end
+<% end -%>
+<% if action_name == "destroy" -%>
+  def destroy
+    @<%= @name %> = <%= @model_class_name %>.find(params[:id])
+    @<%= @name %>.destroy
+    redirect_to <%= @controller_name %>
+  end
+<% end -%>
+<% if action_name == "index" -%>
+  def index
+    @<%= @controller_name %> = <%= @model_class_name %>.all
+  end
+<% end -%>
+
+<% end -%>
+private
+
+<% if @field_names -%>
+  def <%= @name %>_params
+    {
+  <% @field_names.each do |field| -%>
+    <%= field.split(":")[0] %>: params["<%= @controller_name%>"]["<%= field.split(":")[0] %>"],
+  <% end -%>
+  }
+  end
+<% end -%>
+end

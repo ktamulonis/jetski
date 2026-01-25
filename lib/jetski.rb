@@ -7,6 +7,7 @@ require "sqlite3"
 require "kinship"
 
 require_relative './jetski/version'
+require_relative './jetski/helpers/generic'
 require_relative './jetski/helpers/view_helpers'
 require_relative './jetski/helpers/route_helpers'
 require_relative './jetski/helpers/delegatable'
@@ -21,15 +22,22 @@ require_relative './jetski/router'
 require_relative './jetski/autoloader'
 require_relative './jetski/server'
 require_relative './jetski/database/base'
+require_relative './jetski/database/sqlite3'
+require_relative './jetski/database/interface'
+require_relative './jetski/model/crud_helpers'
+require_relative './jetski/model/attributes'
 require_relative './jetski/model'
 require_relative './jetski/view_renderer'
 require_relative "./jetski/relations"
 require_relative "./jetski/events"
 
-module Jetski
-  extend self
-  attr_accessor :kinship
-  def app_root
-    Dir.pwd
+class Jetski
+  include Jetski::Helpers::Generic
+  class << self
+    attr_accessor :kinship
+
+    def app_root
+      Dir.pwd
+    end
   end
 end

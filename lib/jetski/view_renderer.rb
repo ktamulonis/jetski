@@ -1,4 +1,4 @@
-module Jetski
+class Jetski
   class ViewRenderer
     include Jetski::Helpers::ViewHelpers
     extend Jetski::Helpers::Delegatable

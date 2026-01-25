@@ -1,0 +1,5 @@
+class <%= @model_name.capitalize %> < Jetski::Model
+<% if @model_attributes -%>
+  attributes <%= @model_attributes.join(", ") %>
+<% end -%>
+end

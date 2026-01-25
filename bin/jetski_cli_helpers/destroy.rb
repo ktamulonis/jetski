@@ -1,7 +1,7 @@
 module JetskiCLIHelpers
-  class Destroy < Thor
-    include Thor::Actions, JetskiCLIHelpers::Destroyers::Controller,
-    JetskiCLIHelpers::Destroyers::Model, Jetski::Database::Base
+  class Destroy < Base
+    include JetskiCLIHelpers::Destroyers::Controller,
+    JetskiCLIHelpers::Destroyers::Model
     desc "controller NAME ACTION_NAMES", "Destroys a controller"
     def controller(name, *actions)
       destroy_controller(name)

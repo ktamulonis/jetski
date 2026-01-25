@@ -1,0 +1,7 @@
+<h1> New <%= @name %> </h1>
+<form action='/<%= @controller_name %>' method='POST'>
+<% @field_names.each do |field| -%>
+  <input name='<%= @controller_name %>[<%= field.split(":")[0] %>]'/>
+<% end -%>
+  <button type='submit'>Create <%= @name %></button>
+</form>

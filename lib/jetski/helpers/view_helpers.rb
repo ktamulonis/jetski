@@ -1,4 +1,4 @@
-module Jetski
+class Jetski
   module Helpers
     module ViewHelpers
       # Expecting a relative path.

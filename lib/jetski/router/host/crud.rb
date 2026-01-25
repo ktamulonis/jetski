@@ -1,4 +1,4 @@
-module Jetski
+class Jetski
   class Router
     module Host
       class Crud < Base
@@ -44,11 +44,11 @@ module Jetski
             else
               url_param = req_path.split("#{controller_path}/")[-1]
               case
-              when url_param.match(/\d(\/edit)/)
+              when url_param&.match(/\d(\/edit)/)
                 # Edit page
                 opts[:action_name] = "edit"
                 opts[:method] = "GET"
-              when url_param.match(/\d\z/)
+              when url_param&.match(/\d\z/)
                 # matches only id 5 with no additional characters
                 # Determine if show/update/destroy from request_method
                 opts[:method] = req.request_method
@@ -61,7 +61,7 @@ module Jetski
                   opts[:action_name] = "destroy"
                 end
               else
-                handle_controller_render = false
+                @handle_controller_render = false
               end
             end
           end

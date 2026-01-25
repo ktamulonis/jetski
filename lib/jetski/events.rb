@@ -1,5 +1,5 @@
 # lib/jetski/events.rb
-module Jetski
+class Jetski
   module Events
     @subscribers = Hash.new { |h, k| h[k] = [] }
 
@@ -21,4 +21,3 @@ module Jetski
     end
   end
 end
-

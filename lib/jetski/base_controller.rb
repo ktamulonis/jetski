@@ -1,5 +1,5 @@
 # This is the base controller of the library
-module Jetski
+class Jetski
   class BaseController
     RESERVED_INSTANCE_VARIABLES = [
         :@res, :@performed_render, :@action_name, 

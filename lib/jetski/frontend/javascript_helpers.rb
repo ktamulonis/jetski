@@ -1,4 +1,4 @@
-module Jetski
+class Jetski
   module Frontend
     module JavascriptHelpers
       def reactive_text_area(path, **opts)

@@ -1,4 +1,4 @@
-module Jetski
+class Jetski
   module Relations
     extend self
 
@@ -42,4 +42,3 @@ module Jetski
     end
   end
 end
-

@@ -1,0 +1,7 @@
+<h1> Edit <%= @name %> </h1>
+<form action='/<%= @controller_name %>/<%%= @<%= @name %>.id %>' method='PUT'>
+<% @field_names.each do |field| -%>
+  <input name='<%= @controller_name %>[<%= field.split(":")[0] %>]'/>
+<% end -%>
+  <button type='submit'>Update <%= @name %></button>
+</form>

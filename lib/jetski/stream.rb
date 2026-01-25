@@ -1,7 +1,7 @@
 require "json"
 require "thread"
 
-module Jetski
+class Jetski
   class Stream
     @mutex = Mutex.new
     @writers = [] # array of Proc objects: ->(data) { out << data }

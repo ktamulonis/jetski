@@ -1,4 +1,4 @@
-module Jetski
+class Jetski
   module Database
     module Base
       extend self
@@ -7,37 +7,13 @@ module Jetski
         @_db ||= SQLite3::Database.new "test.db"
       end
 
-      def create_table_sql(table_name:, field_names:)
-        pluralized_table_name = if table_name.chars.last == "s"
-          table_name
-        else
-          table_name + "s"
-        end
-
-        # TODO: Clean this code up to a method that can build SQL with correct indentation and endings.
-        # sql.create_table(pluralized_table_name, created_at: :datetime, updated_at: :datetime, id: :integer) etc.
-        _gen_sql = ""
-        _gen_sql += "create table #{pluralized_table_name} (\n"
-        
-        # Default fields on all models
-        _gen_sql += "  created_at datetime,\n"
-        _gen_sql += "  updated_at datetime,\n"
-        _gen_sql += "  id integer,\n"
-
-        field_names.each.with_index do |field_name, idx|
-          field, field_data_type = if field_name.include?(":")
-            field_name.split(":")
-          else
-            [field_name, ""]
-          end
-          data_type = sql_data_type(field_data_type)
-          _gen_sql += "  #{field} #{data_type}"
-          if (idx + 1) < field_names.size
-            _gen_sql += ",\n"
-          else
-            _gen_sql += "\n"
-          end
-        end
+      def create_table_sql(table_name:, field_names: [])
+        table_name = pluralize_string(table_name)
+        default_fields = [["created_at", "datetime"], ["updated_at", "datetime"], ["id", "integer"]]
+        fields = field_names.map { |f| f.split(":") }
+        all_fields = fields + default_fields
+        _gen_sql = "create table #{table_name} (\n"
+        _gen_sql += all_fields.map { |field, data_type| " #{field} #{data_type}" }.join(",\n")
         _gen_sql += ");\n"
         _gen_sql
       end

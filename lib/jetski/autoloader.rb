@@ -1,4 +1,4 @@
-module Jetski
+class Jetski
   module Autoloader
     include Jetski::Router::FilePathHelper
     extend self
@@ -18,14 +18,12 @@ module Jetski
           .join("::")
 
         model_class = Object.const_get(model_name)
-        model_class.define_attribute_methods
-
         loaded_models << model_class
       end
 
       Jetski.kinship = Kinship.build(
         models: loaded_models,
-        attribute_provider: ->(model) { model.attributes }
+        attribute_provider: ->(model) { model.column_names }
       )
 
       Jetski::Relations.generate!
@@ -38,4 +36,3 @@ module Jetski
     end
   end
 end
-

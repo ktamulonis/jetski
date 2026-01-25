@@ -2,14 +2,24 @@ module JetskiCLIHelpers
   module Generators
     module Model
       def generate_model(name, *field_names)
-        db.execute create_table_sql(table_name: name, field_names: field_names)
-        model_file_path = "app/models/#{name}.rb"
-        create_file model_file_path
-        append_to_file model_file_path, <<~MODEL
-          class #{name.capitalize} < Jetski::Model
-            
+        @model_name = name
+        
+        if field_names
+          @model_attributes = []
+          custom_fields = field_names.filter { |f| f.include?(":") }
+          string_fields = field_names - custom_fields
+          string_fields.each do |field|
+            @model_attributes << ":#{field}"
           end
-        MODEL
+
+          custom_fields.each do |custom_field|
+            field, type = custom_field.split(":")
+            @model_attributes << "#{field}: :#{type}"
+          end
+        end
+          
+        model_file_path = "app/models/#{name}.rb"
+        template "model/template.rb.erb", model_file_path
       end
     end
   end

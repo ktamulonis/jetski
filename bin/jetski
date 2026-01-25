@@ -6,14 +6,15 @@ require "optparse"
 require "thor"
 require "pry"
 
-require_relative "./jetski_cli_helpers/generators/controller"
-require_relative "./jetski_cli_helpers/generators/model"
-require_relative "./jetski_cli_helpers/destroyers/controller"
-require_relative "./jetski_cli_helpers/destroyers/model"
-require_relative "./jetski_cli_helpers/shared_methods"
-require_relative "./jetski_cli_helpers/generate"
-require_relative "./jetski_cli_helpers/destroy"
-require_relative "./jetski_cli_helpers/database"
+require_relative "./jetski_cli_helpers/generators/controller.rb"
+require_relative "./jetski_cli_helpers/generators/model.rb"
+require_relative "./jetski_cli_helpers/destroyers/controller.rb"
+require_relative "./jetski_cli_helpers/destroyers/model.rb"
+require_relative "./jetski_cli_helpers/shared_methods.rb"
+require_relative "./jetski_cli_helpers/base.rb"
+require_relative "./jetski_cli_helpers/generate.rb"
+require_relative "./jetski_cli_helpers/destroy.rb"
+require_relative "./jetski_cli_helpers/database.rb"
 
 class JetskiCLI < Thor
   include Thor::Actions
@@ -81,4 +82,3 @@ if ["-v", "--version"].include?(ARGV.first)
 else
   JetskiCLI.start(ARGV)
 end
-

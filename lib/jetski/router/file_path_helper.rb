@@ -1,4 +1,4 @@
-module Jetski
+class Jetski
   class Router
     module FilePathHelper
       def controller_file_paths

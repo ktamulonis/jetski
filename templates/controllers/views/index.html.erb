@@ -1,0 +1,12 @@
+<h1> Viewing all <%= @controller_name %></h1>
+
+<a href="/<%= @controller_name %>/new"> New <%= @name %> </a>
+
+<%% @<%= @controller_name %>.each do |<%= @name %>| %>
+<% @field_names.each do |field| -%>
+  <p> 
+    <%= field.split(":")[0] %>: <%%= <%= @name %>.<%= field.split(":")[0] %> %>
+  </p>
+  <a href='/<%= @controller_name %>/<%%= <%= @name %>.id %>'> View <%= @name %></a>
+<% end %>
+<%% end %>
