@@ -16,7 +16,6 @@ class RouterStreamTest < Minitest::Test
 
     assert tab.key?("/stream"), "Expected /stream to be mounted, got #{tab.keys.inspect}"
   ensure
-    server.shutdown
+    server&.shutdown
   end
 end
-

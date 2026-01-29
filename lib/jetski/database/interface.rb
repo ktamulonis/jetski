@@ -4,6 +4,19 @@ class Jetski
   module Database
     module Interface
       extend self
+
+      def db
+        Jetski::Database::Base.db
+      end
+
+      def create_table_sql(**kwargs)
+        Jetski::Database::Base.create_table_sql(**kwargs)
+      end
+
+      def sql_data_type(str)
+        Jetski::Database::Base.sql_data_type(str)
+      end
+
       def create_table(table_name, *fields)
         db.execute create_table_sql(table_name: table_name, field_names: fields)
       end

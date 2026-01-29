@@ -1,5 +1,15 @@
 require "bundler/setup"
+require "fileutils"
+require "tmpdir"
 require "minitest/autorun"
+
+test_db = ":memory:"
+ENV["JETSKI_DB_PATH"] = test_db
+unless test_db == ":memory:"
+  FileUtils.mkdir_p(File.dirname(test_db))
+  FileUtils.rm_f(test_db)
+end
+
 require "jetski"
 require_relative "support/fakes"
 

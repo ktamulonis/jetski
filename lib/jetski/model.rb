@@ -34,6 +34,10 @@ class Jetski
       extend Jetski::Helpers::Delegatable
       delegate :count, :last, :first, to: :all
 
+      def db
+        Jetski::Database::Base.db
+      end
+
       def table_name
         self.to_s.downcase
       end
@@ -58,6 +62,23 @@ class Jetski
       def column_names
         columns, = db.execute2("select * from #{pluralized_table_name}")
         columns || []
+      rescue SQLite3::SQLException => error
+        raise unless error.message.to_s.include?("no such table")
+        return [] if defined?(@_auto_created) && @_auto_created
+
+        @_auto_created = true
+        Jetski::Database::Interface.create_table_unless_exists(pluralized_table_name)
+        db_attribute_values.each do |attr|
+          Jetski::Database::Interface.add_column_unless_exists(
+            pluralized_table_name,
+            attr[:name],
+            attr[:type]
+          )
+        end
+        columns, = db.execute2("select * from #{pluralized_table_name}")
+        columns || []
+      ensure
+        @_auto_created = false
       end
 
       def patch(id, attrs)

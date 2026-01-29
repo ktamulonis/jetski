@@ -2,9 +2,16 @@ class Jetski
   module Database
     module Base
       extend self
+      extend Jetski::Helpers::Generic
 
       def db
-        @_db ||= SQLite3::Database.new "test.db"
+        path = ENV["JETSKI_DB_PATH"].to_s
+        path = File.join(Jetski.app_root, "dev.db") if path == ""
+        if defined?(@@db_path) && @@db_path != path
+          @@db = nil
+        end
+        @@db_path = path
+        @@db ||= SQLite3::Database.new(path)
       end
 
       def create_table_sql(table_name:, field_names: [])
