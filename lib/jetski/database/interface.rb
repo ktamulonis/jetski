@@ -41,6 +41,16 @@ class Jetski
         table_info = db.execute("PRAGMA table_info(#{table_name})")
         table_info.find { |d| d[1] == field_name.to_s } != nil
       end
+
+      def migrate_models(models)
+        models.each do |model|
+          table_name = model.pluralized_table_name
+          create_table_unless_exists(table_name)
+          model.db_attribute_values.each do |attr|
+            add_column_unless_exists(table_name, attr[:name], attr[:type])
+          end
+        end
+      end
     end
   end
 end
